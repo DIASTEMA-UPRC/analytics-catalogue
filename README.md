@@ -15,13 +15,13 @@ docker build -t analytics-catalogue:latest . -f Dockerfile.dev
 ### How to Run
 The dev image mounts the src folder as a volume under `/app/src`
 
-#### How to build and use image
+#### How to Use Image
 ```bash
 docker run --rm -d analytics-catalogue
 docker exec -it <container-name-or-id> bash
 ```
 
-#### How to execute a Spark Job
+#### How to Execute a Spark Job
 ```bash
 python src/<JobType> <algorithm> <input_path> <output_path> <target_column>
 ```
