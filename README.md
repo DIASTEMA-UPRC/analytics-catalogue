@@ -6,6 +6,7 @@ This project is inteded to by used by [the Diastema orchestrator](https://github
 
 ### Prerequisites
 + Docker
++ MinIO
 
 ### How to Build
 ```bash
