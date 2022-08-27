@@ -1,7 +1,11 @@
 from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
 from pyspark.ml.feature import VectorAssembler
+from pyspark.mllib.util import MLUtils
+from pyspark.mllib.evaluation import MulticlassMetrics
+from pyspark.sql.functions import col
 
 from Job import Job
+from db import get_db_object
 from logger import *
 
 
@@ -42,10 +46,22 @@ def main():
     pred = model.transform(test)
     LOGGER.debug("Fitted and transformed")
 
+    metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
+    predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd
+    metrics = MulticlassMetrics(predictionAndLabels)
+    f1 = metrics.weightedFMeasure()
+    acc = metrics.accuracy
+    confusion = metrics.confusionMatrix().toArray().tolist()
+
     # Export results
     LOGGER.debug("Exporting results...")
+
     out = pred.select(job.args.target_column, "prediction")
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
+
+    db = get_db_object()
+    db.insert_one({ "job_id": job.args.job_id, "f1": f1, "accuracy": acc, "confusion": confusion })
+
     LOGGER.debug("Exported results")
 
     return 0
