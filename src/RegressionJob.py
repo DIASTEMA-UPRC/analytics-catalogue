@@ -1,5 +1,7 @@
 from pyspark.ml.regression import DecisionTreeRegressor, RandomForestRegressor
 from pyspark.ml.feature import VectorAssembler
+from pyspark.sql.functions import col
+from pyspark.mllib.evaluation import RegressionMetrics
 
 from Job import Job
 from logger import *
@@ -42,10 +44,21 @@ def main():
     pred = model.transform(test)
     LOGGER.debug("Fitted and transformed")
 
+    metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
+    predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd
+    metrics = RegressionMetrics(predictionAndLabels)
+    r2 = metrics.r2
+    rmse = metrics.rootMeanSquaredError
+
     # Export results
     LOGGER.debug("Exporting results...")
+    
     out = pred.select(job.args.target_column, "prediction")
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
+    
+    db = job.storage.connect_mongo()["Diastema"]["Analytics"]
+    db.insert_one({ "job_id": job.args.job_id, "r2": r2, "rmse": rmse })
+    
     LOGGER.debug("Exported results")
 
     return 0
@@ -53,4 +66,3 @@ def main():
 if __name__ == "__main__":
     code = main()
     exit(code)
-s
