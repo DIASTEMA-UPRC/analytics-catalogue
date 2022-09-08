@@ -1,11 +1,9 @@
 from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
 from pyspark.ml.feature import VectorAssembler
-from pyspark.mllib.util import MLUtils
 from pyspark.mllib.evaluation import MulticlassMetrics
 from pyspark.sql.functions import col
 
 from Job import Job
-from db import get_db_object
 from logger import *
 
 
@@ -59,7 +57,7 @@ def main():
     out = pred.select(job.args.target_column, "prediction")
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
 
-    db = get_db_object()
+    db = job.storage.connect_mongo()["Diastema"]["Analytics"]
     db.insert_one({ "job_id": job.args.job_id, "f1": f1, "accuracy": acc, "confusion": confusion })
 
     LOGGER.debug("Exported results")
