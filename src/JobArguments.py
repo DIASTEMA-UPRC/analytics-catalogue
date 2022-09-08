@@ -17,12 +17,15 @@ class JobArguments:
         The path to export the resulting data of the job
     target_column : str
         The column to target with the algorithm
+    job_id : str
+        The id of the job
     """
-    def __init__(self, algorithm: str, input_path: str, output_path: str, target_column: str):
+    def __init__(self, algorithm: str, input_path: str, output_path: str, target_column: str, job_id: str):
         self.algorithm     = algorithm
         self.input_path    = input_path
         self.output_path   = output_path
         self.target_column = target_column
+        self.job_id        = job_id
 
 
     def __repr__(self) -> str:
@@ -49,5 +52,6 @@ class JobArguments:
         input_path = sys.argv[2]
         output_path = sys.argv[3]
         target_column = sys.argv[4]
+        job_id = sys.argv[5]
 
-        return JobArguments(algorithm, input_path, output_path, target_column)
+        return JobArguments(algorithm, input_path, output_path, target_column, job_id)

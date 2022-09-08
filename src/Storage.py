@@ -1,14 +1,19 @@
+import pymongo
+
 from pyspark.sql import SparkSession
 from pyspark.context import SparkContext
 
 from logger import *
 
-DEFAULT_HOST = "0.0.0.0"
-DEFAULT_PORT = "9000"
-DEFAULT_USER = "minioadmin"
-DEFAULT_PASS = "minioadmin"
+DEFAULT_HOST       = "0.0.0.0"
+DEFAULT_PORT       = "9000"
+DEFAULT_USER       = "minioadmin"
+DEFAULT_PASS       = "minioadmin"
+DEFAULT_MONGO_HOST = "0.0.0.0"
+DEFAULT_MONGO_PORT = "27017"
 
 
+# NOTE: Mongo support is an afterthought, and is not fully implemented. It is not recommended to use it in production.
 class Storage:
     """
     This class represents a Storage connection config
@@ -23,12 +28,18 @@ class Storage:
         The username to connect with
     password : str
         The password to connect with
+    mongo_host: str
+        The address of the MongoDB server
+    mongo_port: str
+        The port of the MongoDB server
     """
-    def __init__(self, host: str, port: str, username: str, password: str):
-        self.host     = host
-        self.port     = port
-        self.username = username
-        self.password = password
+    def __init__(self, host: str, port: str, username: str, password: str, mongo_host: str, mongo_port: str):
+        self.host       = host
+        self.port       = port
+        self.username   = username
+        self.password   = password
+        self.mongo_host = mongo_host
+        self.mongo_port = mongo_port
 
     
     def __repr__(self) -> str:
@@ -52,6 +63,18 @@ class Storage:
         ctx._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
 
 
+    def connect_mongo(self) -> pymongo.MongoClient:
+        """
+        Connect to the MongoDB server
+
+        Returns
+        -------
+        pymongo.MongoClient
+            The MongoDB client
+        """
+        return pymongo.MongoClient(f"mongodb://{self.mongo_host}:{self.mongo_port}/")
+
+
     @staticmethod
     def get_from_runtime(session: SparkSession):
         """
@@ -67,10 +90,12 @@ class Storage:
         Storage
             The resulting Storage object
         """
-        host     = session.conf.get("spark.executorEnv.MINIO_HOST", DEFAULT_HOST)
-        port     = session.conf.get("spark.executorEnv.MINIO_PORT", DEFAULT_PORT)
-        username = session.conf.get("spark.executorEnv.MINIO_USER", DEFAULT_USER)
-        password = session.conf.get("spark.executorEnv.MINIO_PASS", DEFAULT_PASS)
+        host       = session.conf.get("spark.executorEnv.MINIO_HOST", DEFAULT_HOST)
+        port       = session.conf.get("spark.executorEnv.MINIO_PORT", DEFAULT_PORT)
+        username   = session.conf.get("spark.executorEnv.MINIO_USER", DEFAULT_USER)
+        password   = session.conf.get("spark.executorEnv.MINIO_PASS", DEFAULT_PASS)
+        mongo_host = session.conf.get("spark.executorEnv.MONGO_HOST", DEFAULT_MONGO_HOST)
+        mongo_port = session.conf.get("spark.executorEnv.MONGO_PORT", DEFAULT_MONGO_PORT)
 
         LOGGER.setLevel(logging.WARN)
 
@@ -82,5 +107,9 @@ class Storage:
             LOGGER.warn(f"Using default value for MINIO_USER: '{DEFAULT_USER}'")
         if password == DEFAULT_PASS:
             LOGGER.warn(f"Using default value for MINIO_PASS: '{DEFAULT_PASS}'")
+        if mongo_host == DEFAULT_MONGO_HOST:
+            LOGGER.warn(f"Using default value for MONGO_HOST: '{DEFAULT_MONGO_HOST}'")
+        if mongo_port == DEFAULT_MONGO_PORT:
+            LOGGER.warn(f"Using default value for MONGO_PORT: '{DEFAULT_MONGO_PORT}'")
 
-        return Storage(host, port, username, password)
+        return Storage(host, port, username, password, mongo_host, mongo_port)

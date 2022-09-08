@@ -9,19 +9,22 @@ services:
       - 9001:9001
     command: server /data --address ":9000" --console-address ":9001"
     restart: always
+  mongo:
+    container_name: analytics-catalogue-mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    restart: always
   app:
     container_name: analytics-catalogue-app
     build:
       context: .
       dockerfile: ./Dockerfile.dev
     image: analytics-catalogue:dev
-    ports:
-      - 5000:5000
     volumes:
       - ./src:/app/src
     depends_on:
       - minio
-    environment:
-      - MINIO_HOST=diastema-daas-analytics-catalogue-minio
+      - mongo
     command: tail -F random
     restart: always
