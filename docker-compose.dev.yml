@@ -21,13 +21,10 @@ services:
       context: .
       dockerfile: ./Dockerfile.dev
     image: analytics-catalogue:dev
-    ports:
-      - 5000:5000
     volumes:
       - ./src:/app/src
     depends_on:
       - minio
-    environment:
-      - MONGO_HOST=analytics-catalogue-mongo
+      - mongo
     command: tail -F random
     restart: always
