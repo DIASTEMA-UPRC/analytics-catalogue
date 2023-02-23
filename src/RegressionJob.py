@@ -79,7 +79,7 @@ def main():
     }
 
     performance_db = job.storage.connect_mongo()["UIDB"]["pipelines"]
-    performance_db.update_one({"analysis-id": job.args.analysis_id}, {"$set": {f"performance.{job.args.job_id}": performance}}, upsert=True)
+    performance_db.update_one({"analysisid": job.args.analysis_id}, {"$set": {f"performance.{job.args.job_id}": performance}}, upsert=True)
     
     LOGGER.debug("Exported results")
 
