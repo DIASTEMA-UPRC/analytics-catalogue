@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  minio:
+    container_name: analytics-catalogue-minio
+    image: minio/minio
+    ports:
+      - 9000:9000
+      - 9001:9001
+    command: server /data --address ":9000" --console-address ":9001"
+    restart: always
+  mongo:
+    container_name: analytics-catalogue-mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    restart: always
+  app:
+    container_name: analytics-catalogue-app
+    image: konvoulgaris/diastema-analytics-catalogue
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - minio
+      - mongo
+    command: tail -F random
+    restart: always
