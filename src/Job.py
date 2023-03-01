@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 
 from JobArguments import JobArguments
-from Storage import Storage
+from Storage import Storage, MinIO
 from logger import *
 
 

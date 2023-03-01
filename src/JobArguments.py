@@ -30,7 +30,7 @@ class JobArguments:
 
 
     def __repr__(self) -> str:
-        return f"{self.algorithm.upper()} Job\n  Input Path: {self.input_path}\n  Output Path: {self.output_path}\n  Target Column: {self.target_column}"
+        return f"{self.algorithm.upper()} Job\n  Input Path: {self.input_path}\n  Output Path: {self.output_path}\n  Target Column: {self.target_column}\n  Job ID: {self.job_id}\n  Analysis ID: {self.analysis_id}"
 
 
     @staticmethod

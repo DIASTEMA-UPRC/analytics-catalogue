@@ -38,6 +38,7 @@ class Storage:
         self.port       = port
         self.username   = username
         self.password   = password
+        self.minio      = MinIO(host, port, username, password)
         self.mongo_host = mongo_host
         self.mongo_port = mongo_port
 
@@ -113,3 +114,31 @@ class Storage:
             LOGGER.warn(f"Using default value for MONGO_PORT: '{DEFAULT_MONGO_PORT}'")
 
         return Storage(host, port, username, password, mongo_host, mongo_port)
+
+
+from minio import Minio
+
+class MinIO(Minio):
+    def __init__(self, host, port, username, password):
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.endpoint = f"{host}:{port}"
+
+        super().__init__(self.endpoint, access_key=self.username, secret_key=self.password, secure=False)
+
+        try:
+            if not self.bucket_exists("diastemaviz"):
+                self.make_bucket("diastemaviz")
+        except:
+            raise Exception("Failed to connect to MinIO")
+
+    @staticmethod
+    def get_from_runtime(session: SparkSession):
+        host       = session.conf.get("spark.executorEnv.MINIO_HOST", DEFAULT_HOST)
+        port       = session.conf.get("spark.executorEnv.MINIO_PORT", DEFAULT_PORT)
+        username   = session.conf.get("spark.executorEnv.MINIO_USER", DEFAULT_USER)
+        password   = session.conf.get("spark.executorEnv.MINIO_PASS", DEFAULT_PASS)
+
+        return Storage(host, port, username, password)

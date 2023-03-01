@@ -10,6 +10,8 @@ import time
 import psutil
 import sys
 
+from visualization import visualization_df
+
 
 def main():
     job = Job()
@@ -61,7 +63,8 @@ def main():
     
     out = pred.select(job.args.target_column, "prediction")
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
-    
+    visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
+
     db = job.storage.connect_mongo()["Diastema"]["Analytics"]
     db.insert_one({ "job_id": job.args.job_id, "r2": r2, "rmse": rmse })
     
@@ -77,6 +80,8 @@ def main():
         "disk-usage": int(disk_usage),
         "execution-speed": int(execution_speed)
     }
+
+    LOGGER.debug("Adding to performance database on analysis id: " + job.args.analysis_id)
 
     performance_db = job.storage.connect_mongo()["UIDB"]["pipelines"]
     performance_db.update_one({"analysisid": job.args.analysis_id}, {"$set": {f"performance.{job.args.job_id}": performance}}, upsert=True)

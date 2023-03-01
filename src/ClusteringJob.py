@@ -10,6 +10,8 @@ import time
 import psutil
 import sys
 
+from visualization import visualization_df
+
 
 def main():
     job = Job()
@@ -47,8 +49,15 @@ def main():
 
     # Export results
     LOGGER.debug("Exporting results...")
-    out = model.clusterCenters()[0]
-    out = pd.DataFrame(out, columns=["clusterCenters"])
+    out = model.clusterCenters()
+    
+    df_dict = {}
+    
+    for i in range(len(out)):
+        df_dict[f"cluster_center_{i}"] = out[i]
+    
+    out = pd.DataFrame(df_dict)
+    visualization_df(job.storage.minio, out, job.args.job_id)
     out = job.spark.createDataFrame(out)
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
     
@@ -64,6 +73,8 @@ def main():
         "disk-usage": int(disk_usage),
         "execution-speed": int(execution_speed)
     }
+
+    LOGGER.debug("Adding to performance database on analysis id: " + job.args.analysis_id)
 
     performance_db = job.storage.connect_mongo()["UIDB"]["pipelines"]
     performance_db.update_one({"analysisid": job.args.analysis_id}, {"$set": {f"performance.{job.args.job_id}": performance}}, upsert=True)
