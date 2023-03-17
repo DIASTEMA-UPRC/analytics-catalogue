@@ -1,5 +1,4 @@
-import pandas as pd
-
+from pyspark.ml import Pipeline
 from pyspark.ml.clustering import KMeans
 from pyspark.ml.feature import VectorAssembler
 
@@ -39,28 +38,23 @@ def main():
     # Assemble data
     LOGGER.debug("Assembling data...")
     assembler = VectorAssembler(inputCols=raw.columns, outputCol="features")
-    data = assembler.transform(raw)
+    train, test = raw.randomSplit([0.8, 0.2])
     LOGGER.debug("Assembled data")
 
     # Fit and transform
-    LOGGER.debug("Fitting...")
-    model = model.fit(data)
-    LOGGER.debug("Fitted")
+    LOGGER.debug("Fitting and transforming...")
+    pipeline = Pipeline(stages=[assembler, model])
+    pipelineModel = pipeline.fit(train)
+    pred = pipelineModel.transform(test)
+    LOGGER.debug("Fitted and transformed")
 
-    # Export results
-    LOGGER.debug("Exporting results...")
-    out = model.clusterCenters()
-    
-    df_dict = {}
-    
-    for i in range(len(out)):
-        df_dict[f"cluster_center_{i}"] = out[i]
-    
-    out = pd.DataFrame(df_dict)
-    visualization_df(job.storage.minio, out, job.args.job_id)
-    out = job.spark.createDataFrame(out)
+    LOGGER.debug("Saving model...")
+    pipelineModel.save(f"s3a://diastemamodels/{job.args.job_id}")
+
+    out = pred.select(*[c for c in pred.columns if c != "features"])
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
-    
+    visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
+
     toc = time.perf_counter()
     execution_speed = (toc - tic) * 1000
     ram_usage = (psutil.virtual_memory().total - psutil.virtual_memory().free) / 1024 / 1024

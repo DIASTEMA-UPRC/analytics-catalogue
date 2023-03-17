@@ -2,7 +2,7 @@ version: "3"
 
 services:
   minio:
-    container_name: analytics-catalogue-minio
+    container_name: daas-analytics-catalogue-minio
     image: minio/minio
     ports:
       - 9000:9000
@@ -10,17 +10,17 @@ services:
     command: server /data --address ":9000" --console-address ":9001"
     restart: always
   mongo:
-    container_name: analytics-catalogue-mongo
+    container_name: daas-analytics-catalogue-mongo
     image: mongo
     ports:
       - 27017:27017
     restart: always
   app:
-    container_name: analytics-catalogue-app
+    container_name: daas-analytics-catalogue-app
     build:
       context: .
       dockerfile: ./Dockerfile.dev
-    image: analytics-catalogue:dev
+    image: daas-analytics-catalogue:dev
     volumes:
       - ./src:/app/src
     depends_on:

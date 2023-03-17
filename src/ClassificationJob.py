@@ -1,3 +1,4 @@
+from pyspark.ml import Pipeline
 from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
 from pyspark.ml.feature import VectorAssembler
 from pyspark.mllib.evaluation import MulticlassMetrics
@@ -42,15 +43,18 @@ def main():
     LOGGER.debug("Assembling data...")
     features = raw.drop(job.args.target_column).columns
     assembler = VectorAssembler(inputCols=features, outputCol="features")
-    data = assembler.transform(raw)
-    train, test = data.randomSplit([0.8, 0.2])
+    train, test = raw.randomSplit([0.8, 0.2])
     LOGGER.debug("Assembled data")
 
     # Fit and transform
     LOGGER.debug("Fitting and transforming...")
-    model = model.fit(train)
-    pred = model.transform(test)
+    pipeline = Pipeline(stages=[assembler, model])
+    pipelineModel = pipeline.fit(train)
+    pred = pipelineModel.transform(test)
     LOGGER.debug("Fitted and transformed")
+
+    LOGGER.debug("Saving model...")
+    pipelineModel.save(f"s3a://diastemamodels/{job.args.job_id}")
 
     metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
     predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd

@@ -1,0 +1,6 @@
+spark-submit \
+--conf spark.executorEnv.MINIO_HOST="daas-analytics-catalogue-minio" \
+--conf spark.executorEnv.MINIO_PORT="9000" \
+--conf spark.executorEnv.MONGO_HOST="daas-analytics-catalogue-mongo" \
+--conf spark.executorEnv.MONGO_PORT="27017" \
+src/...
