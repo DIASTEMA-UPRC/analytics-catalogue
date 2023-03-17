@@ -46,9 +46,9 @@ def main():
     LOGGER.debug("Fitted and transformed")
 
     LOGGER.debug("Saving model...")
-    pipelineModel.write().overwrite(f"s3a://diastemamodels/{job.args.job_id}")
+    pipelineModel.write().overwrite().save(f"s3a://diastemamodels/{job.args.job_id}")
 
-    out = pred.select(*[c for c in pred.columns if c != "features"])
+    out = pred.select(*[c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"])
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
     visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
 

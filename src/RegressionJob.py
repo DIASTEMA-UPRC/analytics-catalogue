@@ -49,7 +49,7 @@ def main():
     LOGGER.debug("Fitted and transformed")
 
     LOGGER.debug("Saving model...")
-    pipelineModel.write().overwrite(f"s3a://diastemamodels/{job.args.job_id}")
+    pipelineModel.write().overwrite().save(f"s3a://diastemamodels/{job.args.job_id}")
 
     metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
     predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd
@@ -60,7 +60,7 @@ def main():
     # Export results
     LOGGER.debug("Exporting results...")
     
-    out = pred.select(job.args.target_column, "prediction")
+    out = pred.select(*[c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"])
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
     visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
 

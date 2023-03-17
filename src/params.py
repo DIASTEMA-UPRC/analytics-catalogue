@@ -135,7 +135,7 @@ def get_classification_model_and_params(job: Job):
     return model
 
 
-def get_regression_model_and_params(job, algorithm, params):
+def get_regression_model_and_params(job: Job):
     params_db = job.storage.connect_mongo()["Diastema"]["datatoolkit"]
     params = params_db.find_one({ "job-id": job.args.job_id })
 
