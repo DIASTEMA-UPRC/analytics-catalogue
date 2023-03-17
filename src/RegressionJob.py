@@ -6,8 +6,8 @@ from pyspark.mllib.evaluation import RegressionMetrics
 
 from Job import Job
 from logger import *
+from params import get_regression_model_and_params
 
-import pickle
 import time
 import psutil
 import sys
@@ -20,17 +20,12 @@ def main():
 
     if not job.args:
         return 1
-    
+
     tic = time.perf_counter()
 
-    # Find algorithm
-    if job.args.algorithm.upper() == "DECISIONTREE":
-        model = DecisionTreeRegressor(labelCol=job.args.target_column, featuresCol="features")
-    elif job.args.algorithm.upper() == "RANDOMFOREST":
-        model = RandomForestRegressor(labelCol=job.args.target_column, featuresCol="features")
-    else:
-        LOGGER.setLevel(logging.FATAL)
-        LOGGER.fatal(f"Unknown classification algorithm: '{job.args.algorithm}'")
+    model = get_regression_model_and_params(job)
+
+    if not model:
         return 1
 
     LOGGER.setLevel(logging.DEBUG)

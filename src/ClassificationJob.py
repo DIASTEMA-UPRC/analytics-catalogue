@@ -6,6 +6,7 @@ from pyspark.sql.functions import col
 
 from Job import Job
 from logger import *
+from params import get_classification_model_and_params
 
 import time
 import psutil
@@ -22,14 +23,9 @@ def main():
 
     tic = time.perf_counter()
 
-    # Find algorithm
-    if job.args.algorithm.upper() == "DECISIONTREE":
-        model = DecisionTreeClassifier(labelCol=job.args.target_column, featuresCol="features")
-    elif job.args.algorithm.upper() == "RANDOMFOREST":
-        model = RandomForestClassifier(labelCol=job.args.target_column, featuresCol="features")
-    else:
-        LOGGER.setLevel(logging.FATAL)
-        LOGGER.fatal(f"Unknown classification algorithm: '{job.args.algorithm}'")
+    model = get_classification_model_and_params(job)
+
+    if not model:
         return 1
 
     LOGGER.setLevel(logging.DEBUG)

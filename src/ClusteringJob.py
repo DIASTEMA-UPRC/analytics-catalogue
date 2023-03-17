@@ -4,6 +4,7 @@ from pyspark.ml.feature import VectorAssembler
 
 from Job import Job
 from logger import *
+from params import get_clustering_model_and_params
 
 import time
 import psutil
@@ -20,16 +21,13 @@ def main():
 
     tic = time.perf_counter()
 
-    # Find algorithm
-    if job.args.algorithm.upper() == "KMEANS":
-        model = KMeans()
-    else:
-        LOGGER.setLevel(logging.FATAL)
-        LOGGER.fatal(f"Unknown classification algorithm: '{job.args.algorithm}'")
+    model = get_clustering_model_and_params(job)
+
+    if not model:
         return 1
-    
+
     LOGGER.setLevel(logging.DEBUG)
-    
+
     # Load data
     LOGGER.debug("Loading data...")
     raw = job.spark.read.option("header", True).option("inferSchema", True).csv(f"s3a://{job.args.input_path}/*")
