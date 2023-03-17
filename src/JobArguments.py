@@ -20,16 +20,17 @@ class JobArguments:
     job_id : str
         The id of the job
     """
-    def __init__(self, algorithm: str, input_path: str, output_path: str, target_column: str, job_id: str):
+    def __init__(self, algorithm: str, input_path: str, output_path: str, target_column: str, job_id: str, analysis_id: str):
         self.algorithm     = algorithm
         self.input_path    = input_path
         self.output_path   = output_path
         self.target_column = target_column
         self.job_id        = job_id
+        self.analysis_id   = analysis_id
 
 
     def __repr__(self) -> str:
-        return f"{self.algorithm.upper()} Job\n  Input Path: {self.input_path}\n  Output Path: {self.output_path}\n  Target Column: {self.target_column}"
+        return f"{self.algorithm.upper()} Job\n  Input Path: {self.input_path}\n  Output Path: {self.output_path}\n  Target Column: {self.target_column}\n  Job ID: {self.job_id}\n  Analysis ID: {self.analysis_id}"
 
 
     @staticmethod
@@ -42,7 +43,7 @@ class JobArguments:
         JobArguments
             The resulting JobArguments object
         """
-        if len(sys.argv) < 5:
+        if len(sys.argv) < 6:
             LOGGER.setLevel(logging.WARN)
             LOGGER.warn("Missing job arguments from runtime!")
 
@@ -53,5 +54,6 @@ class JobArguments:
         output_path = sys.argv[3]
         target_column = sys.argv[4]
         job_id = sys.argv[5]
+        analysis_id = sys.argv[6]
 
-        return JobArguments(algorithm, input_path, output_path, target_column, job_id)
+        return JobArguments(algorithm, input_path, output_path, target_column, job_id, analysis_id)

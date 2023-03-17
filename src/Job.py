@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 
 from JobArguments import JobArguments
-from Storage import Storage
+from Storage import Storage, MinIO
 from logger import *
 
 
@@ -33,3 +33,6 @@ class Job:
         else:
             LOGGER.setLevel(logging.DEBUG)
             LOGGER.debug(f"\n-----\n{self.args}\nWith {self.storage}\n-----")
+
+            if not self.storage.minio.bucket_exists("diastemamodels"):
+                self.storage.minio.make_bucket("diastemamodels")

@@ -1,5 +1,5 @@
-# analytics-catalogue
-The Diastema Analytics Catalogue
+# daas-analytics-catalogue
+The Diastema DaaS Analytics Catalogue
 
 ## How to Use
 This project is inteded to by used by [the Diastema orchestrator](https://github.com/DIASTEMA-UPRC/orchestrator). If you need information on how to use it alongside other components, please refer to that documentation. If you need information on how to run this in isolation, follow the steps described below:
