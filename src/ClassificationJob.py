@@ -49,7 +49,7 @@ def main():
     LOGGER.debug("Fitted and transformed")
 
     LOGGER.debug("Saving model...")
-    pipelineModel.save(f"s3a://diastemamodels/{job.args.job_id}")
+    pipelineModel.write().overwrite(f"s3a://diastemamodels/{job.args.job_id}")
 
     metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
     predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd
