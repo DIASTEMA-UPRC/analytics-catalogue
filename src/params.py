@@ -6,7 +6,7 @@ from logger import LOGGER
 
 def get_classification_model_and_params(job: Job):
     params_db = job.storage.connect_mongo()["Diastema"]["datatoolkit"]
-    params = params_db.find_one({ "job_id": job.args.job_id })
+    params = params_db.find_one({ "job-id": job.args.job_id })
 
     if not params:
         params = dict()
@@ -23,7 +23,7 @@ def get_classification_model_and_params(job: Job):
         maxIter = params.get("maxIter", 100)
         regParam = params.get("regParam", 0.0)
         elasticNetParam = params.get("elasticNetParam", 0.0)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         fitIntercept = params.get("fitIntercept", True)
         threshold = params.get("threshold", 0.5)
         standardization = params.get("standardization", True)
@@ -75,7 +75,7 @@ def get_classification_model_and_params(job: Job):
         maxIter = params.get("maxIter", 20)
         stepSize = params.get("stepSize", 0.1)
         subsamplingRate = params.get("subsamplingRate", 1.0)
-        validationTol = params.get("validationTol", 0.01)
+        validationTol = float(params.get("validationTol", 0.01))
         minWeightFractionPerNode = params.get("minWeightFractionPerNode", 0.0)
 
         model = GBTClassifier(labelCol=job.args.target_column, featuresCol="features", maxDepth=maxDepth, maxBins=maxBins, minInstancesPerNode=minInstancesPerNode, minInfoGain=minInfoGain, maxMemoryInMB=maxMemoryInMB, cacheNodeIds=cacheNodeIds, checkpointInterval=checkpointInterval, maxIter=maxIter, stepSize=stepSize, subsamplingRate=subsamplingRate, validationTol=validationTol, minWeightFractionPerNode=minWeightFractionPerNode)
@@ -83,7 +83,7 @@ def get_classification_model_and_params(job: Job):
         from pyspark.ml.classification import MultilayerPerceptronClassifier
     
         maxIter = params.get("maxIter", 100)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         blockSize = params.get("blockSize", 128)
         stepSize = params.get("stepSize", 0.03)
         solver = params.get("solver", "l-bfgs")
@@ -94,7 +94,7 @@ def get_classification_model_and_params(job: Job):
 
         maxIter = params.get("maxIter", 100)
         regParam = params.get("regParam", 0.0)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         fitIntercept = params.get("fitIntercept", True)
         standardization = params.get("standardization", True)
         threshold = params.get("threshold", 0.0)
@@ -124,7 +124,7 @@ def get_classification_model_and_params(job: Job):
         initStd = params.get("initStd", 0.01)
         maxIter = params.get("maxIter", 100)
         stepSize = params.get("stepSize", 1.0)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         solver = params.get("solver", "adamW")
 
         model = FMClassifier(labelCol=job.args.target_column, featuresCol="features", numFactors=numFactors, fitIntercept=fitIntercept, fitLinear=fitLinear, regParam=regParam, miniBatchFraction=miniBatchFraction, initStd=initStd, maxIter=maxIter, stepSize=stepSize, tol=tol, solver=solver)
@@ -137,7 +137,7 @@ def get_classification_model_and_params(job: Job):
 
 def get_regression_model_and_params(job, algorithm, params):
     params_db = job.storage.connect_mongo()["Diastema"]["datatoolkit"]
-    params = params_db.find_one({ "job_id": job.args.job_id })
+    params = params_db.find_one({ "job-id": job.args.job_id })
 
     if not params:
         params = dict()
@@ -154,7 +154,7 @@ def get_regression_model_and_params(job, algorithm, params):
         maxIter = params.get("maxIter", 100)
         regParam = params.get("regParam", 0.0)
         elasticNetParam = params.get("elasticNetParam", 0.0)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         fitIntercept = params.get("fitIntercept", True)
         standardization = params.get("standardization", True)
         solver = params.get("solver", "auto")
@@ -214,7 +214,7 @@ def get_regression_model_and_params(job, algorithm, params):
 
         fitIntercept = params.get("fitIntercept", True)
         maxIter = params.get("maxIter", 100)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         aggregationDepth = params.get("aggregationDepth", 2)
         maxBlockSizeInMB = params.get("maxBlockSizeInMB", 0)
 
@@ -236,7 +236,7 @@ def get_regression_model_and_params(job, algorithm, params):
         initStd = params.get("initStd", 0.01)
         maxIter = params.get("maxIter", 100)
         stepSize = params.get("stepSize", 1.0)
-        tol = params.get("tol", 1e-6)
+        tol = float(params.get("tol", 1e-6))
         solver = params.get("solver", "adamW")
 
         model = FMRegressor(labelCol=job.args.target_column, featuresCol="features", numFactors=numFactors, fitIntercept=fitIntercept, fitLinear=fitLinear, regParam=regParam, miniBatchFraction=miniBatchFraction, initStd=initStd, maxIter=maxIter, stepSize=stepSize, tol=tol, solver=solver)
@@ -249,7 +249,7 @@ def get_regression_model_and_params(job, algorithm, params):
 
 def get_clustering_model_and_params(job: Job):
     params_db = job.storage.connect_mongo()["Diastema"]["datatoolkit"]
-    params = params_db.find_one({ "job_id": job.args.job_id })
+    params = params_db.find_one({ "job-id": job.args.job_id })
 
     if not params:
         params = dict()
@@ -266,7 +266,7 @@ def get_clustering_model_and_params(job: Job):
         k = params.get("k", 2)
         initMode = params.get("initMode", "k-means||")
         initSteps = params.get("initSteps", 5)
-        tol = params.get("tol", 0.0001)
+        tol = float(params.get("tol", 0.0001))
         maxIter = params.get("maxIter", 20)
         distanceMeasure = params.get("distanceMeasure", "euclidean")
 
@@ -289,7 +289,7 @@ def get_clustering_model_and_params(job: Job):
         from pyspark.ml.clustering import GaussianMixture
 
         k = params.get("k", 2)
-        tol = params.get("tol", 0.01)
+        tol = float(params.get("tol", 0.01))
         maxIter = params.get("maxIter", 100)
         aggregationDepth = params.get("aggregationDepth", 2)
 

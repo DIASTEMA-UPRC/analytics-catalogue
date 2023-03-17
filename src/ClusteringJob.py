@@ -1,5 +1,4 @@
 from pyspark.ml import Pipeline
-from pyspark.ml.clustering import KMeans
 from pyspark.ml.feature import VectorAssembler
 
 from Job import Job
@@ -46,8 +45,8 @@ def main():
     pred = pipelineModel.transform(test)
     LOGGER.debug("Fitted and transformed")
 
-    LOGGER.debug("Saving model...")
-    pipelineModel.save(f"s3a://diastemamodels/{job.args.job_id}")
+    # LOGGER.debug("Saving model...")
+    # pipelineModel.save(f"s3a://diastemamodels/{job.args.job_id}")
 
     out = pred.select(*[c for c in pred.columns if c != "features"])
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")

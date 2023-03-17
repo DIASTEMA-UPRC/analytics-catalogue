@@ -1,5 +1,4 @@
 from pyspark.ml import Pipeline
-from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
 from pyspark.ml.feature import VectorAssembler
 from pyspark.mllib.evaluation import MulticlassMetrics
 from pyspark.sql.functions import col

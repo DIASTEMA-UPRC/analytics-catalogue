@@ -1,5 +1,4 @@
 from pyspark.ml import Pipeline
-from pyspark.ml.regression import DecisionTreeRegressor, RandomForestRegressor
 from pyspark.ml.feature import VectorAssembler
 from pyspark.sql.functions import col
 from pyspark.mllib.evaluation import RegressionMetrics
