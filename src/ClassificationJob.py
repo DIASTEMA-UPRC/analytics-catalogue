@@ -51,6 +51,7 @@ def main():
     LOGGER.debug("Saving model...")
     pipelineModel.write().overwrite().save(f"s3a://diastemamodels/{job.args.job_id}")
 
+    columns = [c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"]
     metricPred = pred.withColumn(job.args.target_column, col(job.args.target_column).cast("double"))
     predictionAndLabels = metricPred.select(job.args.target_column, "prediction").rdd
     metrics = MulticlassMetrics(predictionAndLabels)
@@ -61,12 +62,12 @@ def main():
     # Export results
     LOGGER.debug("Exporting results...")
 
-    out = pred.select(*[c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"])
+    out = pred.select(*columns)
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
     visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
 
     db = job.storage.connect_mongo()["Diastema"]["Analytics"]
-    db.insert_one({ "job_id": job.args.job_id, "f1": f1, "accuracy": acc, "confusion": confusion })
+    db.insert_one({ "job_id": job.args.job_id, "columns": columns, "f1": f1, "accuracy": acc, "confusion": confusion })
 
     toc = time.perf_counter()
     execution_speed = (toc - tic) * 1000
