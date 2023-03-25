@@ -48,9 +48,14 @@ def main():
     LOGGER.debug("Saving model...")
     pipelineModel.write().overwrite().save(f"s3a://diastemamodels/{job.args.job_id}")
 
-    out = pred.select(*[c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"])
+    columns = [c for c in pred.columns if (c in test.columns and c != "features") or c == "prediction"]
+
+    out = pred.select(*columns)
     out.repartition(1).write.csv(path=f"s3a://{job.args.output_path}", header="true", mode="overwrite")
     visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
+
+    db = job.storage.connect_mongo()["Diastema"]["Analytics"]
+    db.insert_one({ "job_id": job.args.job_id, "columns": columns })
 
     toc = time.perf_counter()
     execution_speed = (toc - tic) * 1000
