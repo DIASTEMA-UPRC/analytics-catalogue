@@ -66,7 +66,7 @@ def main():
     visualization_df(job.storage.minio, out.toPandas(), job.args.job_id)
 
     db = job.storage.connect_mongo()["Diastema"]["Analytics"]
-    db.insert_one({ "job_id": job.args.job_id, "r2": r2, "rmse": rmse })
+    db.insert_one({ "job_id": job.args.job_id, "columns": columns, "r2": r2, "rmse": rmse })
     
     toc = time.perf_counter()
     execution_speed = (toc - tic) * 1000
